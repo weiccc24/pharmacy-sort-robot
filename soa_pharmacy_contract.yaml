@@ -1,0 +1,73 @@
+robot_type: soa
+
+fps: 30
+max_duration_s: 30.0
+
+observations:
+  # Wrist USB cam (mounted on gripper) -> front view of the grasp
+  - key: observation.images.front
+    topic: /follower/image_raw/compressed
+    type: sensor_msgs/msg/CompressedImage
+    image:
+      resize: [480, 640]
+    align: {strategy: hold, stamp: header}
+    qos: {reliability: best_effort, history: keep_last, depth: 10}
+
+  # Overhead RealSense D435i -> top-down view of workspace and pill bottle
+  - key: observation.images.side
+    topic: /static_camera/overhead_cam/color/image_raw/compressed
+    type: sensor_msgs/msg/CompressedImage
+    image:
+      resize: [480, 640]
+    align: {strategy: hold, stamp: header}
+    qos: {reliability: best_effort, history: keep_last, depth: 10}
+
+  # Follower arm joint positions (6 DOF: 5 arm + 1 gripper)
+  # rad2deg: ROS publishes radians, model expects degrees
+  - key: observation.state
+    topic: /follower/joint_states
+    type: sensor_msgs/msg/JointState
+    selector:
+      names:
+        - position.shoulder_pan
+        - position.shoulder_lift
+        - position.elbow_flex
+        - position.wrist_flex
+        - position.wrist_roll
+        - position.gripper
+    align: {strategy: hold, stamp: header}
+    qos: {reliability: best_effort, history: keep_last, depth: 50}
+    unit_conversion: rad2deg
+
+actions:
+  # Arm ForwardCommandController: 5 joints (no gripper)
+  # rad2deg applies INVERSE here: model outputs degrees -> published as radians
+  - key: action
+    publish:
+      topic: /follower/arm_fwd_controller/commands
+      type: std_msgs/msg/Float64MultiArray
+      qos: {reliability: reliable, history: keep_last, depth: 10}
+    selector:
+      names:
+        - position.shoulder_pan
+        - position.shoulder_lift
+        - position.elbow_flex
+        - position.wrist_flex
+        - position.wrist_roll
+    unit_conversion: rad2deg
+    safety_behavior: hold
+
+  # Gripper ForwardCommandController: 1 joint
+  - key: action
+    publish:
+      topic: /follower/gripper_fwd_controller/commands
+      type: std_msgs/msg/Float64MultiArray
+      qos: {reliability: reliable, history: keep_last, depth: 10}
+    selector:
+      names:
+        - position.gripper
+    unit_conversion: rad2deg
+    safety_behavior: hold
+
+recording:
+  storage: mcap
