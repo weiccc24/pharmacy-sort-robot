@@ -1,3 +1,5 @@
+# Note: written for the original MoveIt2 pipeline — superseded by ACT policy (see README).
+
 #!/usr/bin/env python3
 """
 pharmacy_sort.py
