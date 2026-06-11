@@ -35,6 +35,7 @@ During implementation, the MoveIt2 pipeline proved unreliable for fine grasping 
 - **Pipeline:** LeRobot `record` → HuggingFace dataset `weiccc14/pharmacy_sort_act` → ACT training
 - **Policy hosted on HuggingFace:** [weiccc14/pharmacy_sort_act](https://huggingface.co/weiccc14/pharmacy_sort_act)
 - **Inference:** Rosetta lifecycle node consuming the trained checkpoint, running at ~280 ms/chunk on CPU (no NVIDIA driver accessible inside the Docker container)
+- **Classical control layer:** The ACT policy outputs target joint angles which are tracked by ROS2 `forward_command_controller` — a classical PID joint position controller running at 50 Hz. The learning component decides *where* to move; the classical controller closes the loop to get there.
 
 ### Evaluation
 
@@ -177,8 +178,8 @@ ros2 launch rosetta rosetta_client_launch.py
 
 **Terminal 3 — run a trial:**
 ```bash
-~/techin517/home.sh                          # home the arm
-~/techin517/run_trial.sh 1 baseline         # run trial 1
+./home.sh                          # home the arm
+./run_trial.sh 1 baseline         # run trial 1
 # Press ENTER when bottle lands in bin = SUCCESS
 # Let 30s expire if arm fails = FAIL → enter failure mode
 ```
@@ -187,9 +188,9 @@ State labels: `baseline` | `ambient_variance` | `geometry_shift`
 
 **Generate results charts:**
 ```bash
-MPLBACKEND=Agg python3 final_project/analyze_results.py \
-    --csv ~/techin517/final_project/results/trials_raw.csv \
-    --out final_project/results/
+MPLBACKEND=Agg python3 analyze_results.py \
+    --csv results/trials_raw.csv \
+    --out results/
 ```
 
 ---
@@ -203,7 +204,7 @@ MPLBACKEND=Agg python3 final_project/analyze_results.py \
 | `results/completion_times.png` | Bar chart: mean ± std completion time per state |
 | `results/failure_modes.png` | Horizontal bar chart: failure mode counts |
 | `analyze_results.py` | Generates all charts from the CSV |
-| `check_success.py` | YOLO-based automated success detection (not used in final eval — manual ENTER press used instead) |
+| `check_success.py` | YOLO-based CV success detector: grabs overhead RealSense frame, runs YOLOv8n, checks if pill bottle centroid falls inside calibrated bin ROI. Developed as automated evaluation tool; manual logging used in final 30 trials due to RealSense instability during sessions. |
 | `soa_pharmacy_contract.yaml` | Rosetta contract file: camera topics, joint topics, prompt format |
 | `~/techin517/run_trial.sh` | Shell script: starts policy action, live timer, logs result to CSV |
 | `~/techin517/home.sh` | Resets arm to home joint angles after each trial |
