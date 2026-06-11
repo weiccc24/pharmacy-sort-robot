@@ -4,7 +4,7 @@
 
 A unimanual SO101 robot arm trained via ACT (Action Chunking Transformer) imitation learning to pick up an orange pill bottle and sort it into a designated bin. The policy was trained with the LeRobot/Rosetta pipeline and evaluated across three experimental conditions.
 
-- **Demo video:** https://drive.google.com/file/d/1mJWoPWveSMwVZ6PIgFV2uj4DsJnEkiEO/view?usp=sharing
+- **Demo video:** [Trial6_Baseline_demo ](https://drive.google.com/file/d/1mJWoPWveSMwVZ6PIgFV2uj4DsJnEkiEO/view?usp=sharing)
 - **Trained model:** [weiccc14/pharmacy_sort_act](https://huggingface.co/weiccc14/pharmacy_sort_act) on Hugging Face
 - **Training data:** 35 teleoperation episodes (collected via leader→follower arm mirroring)
 
