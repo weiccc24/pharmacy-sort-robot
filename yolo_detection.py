@@ -1,3 +1,5 @@
+# Note: written for the original MoveIt2 pipeline — superseded by ACT policy (see README).
+
 """
 Pharmacy Logistics Sorting Assistant — YOLO Object Detection Demo
 TECHIN 517 Mid-Project Demo
